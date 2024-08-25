@@ -16,16 +16,25 @@ export class InvoiceService {
 
   async fetchInvoice():Promise<Iinvoice[]>{
     const existingInvoice = await this.invoiceModel.find();
+    if(!existingInvoice || existingInvoice.length == 0){
+      throw new NotFoundException('No invoice found');
+    }
     return existingInvoice;
   }
 
   async updateInvoice(Id:string,updateinvoiceDto:UpdateInvoiceDto):Promise<Iinvoice>{
     const updatedInvoice = await this.invoiceModel.findByIdAndUpdate(Id,updateinvoiceDto,{new:true});
+    if(!updatedInvoice){
+      throw new NotFoundException(`Invoice with id ${Id} not found`);
+    }
     return updatedInvoice;
   }
 
   async deleteInvoice(Id:string):Promise<Iinvoice>{
     const deletedInvoice = await this.invoiceModel.findByIdAndDelete(Id);
+    if(!deletedInvoice){
+      throw new NotFoundException(`Invoice with id ${Id} not found`);
+    }
     return deletedInvoice;
   }
 

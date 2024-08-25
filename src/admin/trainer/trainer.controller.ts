@@ -14,6 +14,27 @@ export class TrainerController {
   async create(@Body() createTrainerDto: CreateTrainerDto,@Res() response) {
 
     try{
+      const userEmail = await this.trainerService.findUserEmail(createTrainerDto.emailId);
+      const userMobile = await this.trainerService.findUserMobile(createTrainerDto.mobile);
+
+      if(userEmail){
+        if(userEmail.emailId === createTrainerDto.emailId){
+          return response.status(HttpStatus.NOT_ACCEPTABLE).json({
+            error: 'Not Acceptable',
+            message: 'Email already exists',
+            statusCode: 406
+          })
+        }
+      }
+      if(userMobile){
+        if(userMobile.mobile === createTrainerDto.mobile){
+          return response.status(HttpStatus.NOT_ACCEPTABLE).json({
+            error: 'Not Acceptable',
+            message: 'Mobile number already exists',
+            statusCode: 406
+          })
+        }
+      }
       const newtrainer = await this.trainerService.create(createTrainerDto);
       return response.status(HttpStatus.CREATED).json({message:'Trainer has been created successfully',newtrainer});
     }
@@ -50,17 +71,14 @@ export class TrainerController {
     try{
       const trainer = await this.trainerService.updatetrainer(id, updateTrainerDto);
       return await response.status(HttpStatus.OK).json({
-        response: trainer
+        message: 'Trainer found successfully',trainer,
       });
     }
 
     catch(err){
 
-      return response.status(HttpStatus.BAD_REQUEST).json({
-        STATUS_CODES:400,
-        message:'Error: Trainer is not updated!',
-        error:'Bad Request'
-      });
+      return response.status(err.status).json(err.response);
+
     }
   }
 
@@ -69,16 +87,14 @@ export class TrainerController {
     try{
       const trainer = await this.trainerService.deletetrainer(id);
       return await response.status(HttpStatus.OK).json({
-        response: trainer
+        message: 'Trainer deleted successfully',
+        trainer,
       });
     }
 
     catch(err){
-      return response.status(HttpStatus.BAD_REQUEST).json({
-        STATUS_CODES:400,
-        message:'Error: Trainer is not deleted!',
-        error:'Bad Request'
-      });
+     
+      return response.status(err.status).json(err.response);
     }
   }
 

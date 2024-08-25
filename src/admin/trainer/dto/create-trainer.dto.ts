@@ -65,5 +65,7 @@ export class CreateTrainerDto {
     @IsNotEmpty()
     readonly islocalIdVerified: boolean;
 
+   
+
 
 }

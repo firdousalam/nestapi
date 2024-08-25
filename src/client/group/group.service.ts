@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,18 +15,47 @@ export class GroupService {
     return newGroup.save();
   }
 
-  async fetchGroup(){
-    return this.groupModel.find();
+  async fetchGroup(): Promise<IGroup[]> {
+    const users = await this.groupModel.find();
+    if (!users || users.length == 0) {
+      throw new NotFoundException('User data not found!');
+  }
+    return users;
   }
 
-  async updateGroup(data:any){
-    return this.groupModel.findByIdAndUpdate(data.groupId,data.groupData,{new:true});
+  async findOne(id: string): Promise<IGroup> {
+    const existingUser= await this.groupModel.findById(id).exec();
+    if (!existingUser) {
+      throw new NotFoundException(`User #${id} not found`);
+     }
+     return existingUser;
   }
 
 
-  async deleteGroup(data:any){
-    return this.groupModel.findByIdAndDelete(data.groupId);
+
+  async updateGroup(id: string, updateGroupDto: UpdateGroupDto): Promise<IGroup> {
+    const existingUser = await this.groupModel.findByIdAndUpdate(id, updateGroupDto, { new: true });
+   if (!existingUser) {
+     throw new NotFoundException(`Student #${id} not found`);
+   }
+   return existingUser;
+}
+
+async deleteGroup(id: string): Promise<IGroup> {
+  const deletedUser = await this.groupModel.findByIdAndDelete(id);
+ if (!deletedUser) {
+   throw new NotFoundException(`Student #${id} not found`);
+ }
+ return deletedUser;
+}
+
+ async findUserEmail(emailId: string){
+     return await this.groupModel.findOne({emailId},{_id: false, emailId: true})
   }
+ async findUserMobile(contact: number){
+    return await this.groupModel.findOne({contact},{_id: false, contact: true})
+  }
+}
 
 
   // findAll() {
@@ -44,4 +73,4 @@ export class GroupService {
   // remove(id: number) {
   //   return `This action removes a #${id} group`;
   // }
-}
+

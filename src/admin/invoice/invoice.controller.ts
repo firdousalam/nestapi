@@ -53,18 +53,15 @@ export class InvoiceController {
 
     try{
       const invoice = await this.invoiceService.updateInvoice(id,updateinvoicedto);
-      return await response.status(HttpStatus.OK).json({
-        response: invoice
+      return response.status(HttpStatus.OK).json({
+        message: 'Invoice updated successfully',invoice
       });
     }
 
     catch(err){
 
-      return response.status(HttpStatus.BAD_REQUEST).json({
-        STATUS_CODES:400,
-        message:'Error: Invoice is not updated!',
-        error:'Bad Request'
-      });
+      return response.status(err.status).json(err.response);
+
     }
   }
 
@@ -73,17 +70,13 @@ export class InvoiceController {
     try{
       const invoice = await this.invoiceService.deleteInvoice(id);
       return await response.status(HttpStatus.OK).json({
-        response: invoice
+        message: 'Invoice deleted successfully',invoice
       });
     }
 
     catch(err){
 
-      return response.status(HttpStatus.BAD_REQUEST).json({
-        STATUS_CODES:400,
-        message:'Error: Invoice is not deleted!',
-        error:'Bad Request'
-      });
+     return response.status(err.status).json(err.response);
     }
   }
 

@@ -19,7 +19,7 @@ export class Group{
     @Prop() isU: boolean;
     @Prop() isA: boolean;
     @Prop() isDBA: boolean;
-    @Prop({ type: GroupMemberSchema, required: true}) groupMember: GroupMember;
+    @Prop({ type: [GroupMemberSchema], required: true}) groupMember: GroupMember[];
     
 }
 export const GroupSchema= SchemaFactory.createForClass(Group);

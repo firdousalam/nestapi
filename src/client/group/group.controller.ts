@@ -8,12 +8,42 @@ import { response } from 'express';
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
-  @Post()
+  @Post('/signup')
   async create(@Body() createGroupDto: CreateGroupDto,
 @Res() response,)
   
    {
     try{
+
+      const userEmail = await this.groupService.findUserEmail(createGroupDto.emailId);       //for fetching emailId that user provided from database if present
+      const userMobile = await this.groupService.findUserMobile(createGroupDto.contact);     // for fetching mobile no that user provided from database if present
+      
+    
+      //checking if database returns any data
+      if(userEmail){
+        //checking if fetched emailid matches with the provided emailid
+        if(userEmail.emailId === createGroupDto.emailId ){
+          return response.status(HttpStatus.NOT_ACCEPTABLE).json({
+            error: 'Not Acceptable',
+            message: 'EmailId already Exists',
+            statusCode: 406
+          })
+        }
+      }
+      //checking if database returns any data
+      if(userMobile){
+        //checking if fetched mobile no matches with the provided mobile no
+        if(userMobile.contact === createGroupDto.contact ){
+          return response.status(HttpStatus.NOT_ACCEPTABLE).json({
+            error: 'Not Acceptable',
+            message: 'Mobile Number already Exists',
+            statusCode: 406
+          })
+        }
+      }
+
+
+
       const newGroup =
       await this.groupService.create(createGroupDto);
       
@@ -54,11 +84,24 @@ export class GroupController {
   
   }
 
+  @Get(':id')
+  async findOne(@Res() response, @Param('id') id: string) {
+    try {
+      const existingUser= await this.groupService.findOne(id);
+      return response.status(HttpStatus.OK).json({
+      message: 'User found successfully',existingUser,
+    });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
+    
+  }
+
 
   @Post('/updateGroup')
-  async updateGroup(@Res() response, @Body() data:any){
+  async updateGroup(@Res() response, @Param('id') id:string, @Body() updateGroupDto:UpdateGroupDto){
     try{
-      const group=await this.groupService.updateGroup(data);
+      const group=await this.groupService.updateGroup(id,updateGroupDto);
       return await response.status(HttpStatus.OK).json({
         response:group
       });
@@ -74,12 +117,13 @@ export class GroupController {
    
   }
 
-  @Post('deleteGroup')
-  async DeleteGroup(@Res() response,@Body() data:any){
+  @Delete('deleteGroup')
+  async DeleteGroup(@Res() response,@Param('id') id:string){
     try{
-      const group=await this.groupService.deleteGroup(data);
+      const group=await this.groupService.deleteGroup(id);
       return await response.status(HttpStatus.OK).json({
-        response:group
+        message:'user deleted succesfully',
+        group,
       });
     }
 
