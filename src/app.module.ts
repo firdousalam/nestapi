@@ -1,41 +1,28 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { InvoiceModule } from './invoice/invoice.module';
-import { CustomerModule } from './customer/customer.module';
+import { IndividualModule } from './client/individual/individual.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { StudentSchema } from './schemas/student.schema';
-import { StudentService } from './student/student.service';
-import { StudentController } from './student/student.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { Poll } from './entity/poll.entity';
-import { PollService } from './poll/poll.service';
-import { PollController } from './poll/poll.controller';
-
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { config } from 'src/config/config';
+import { ConfigModule } from '@nestjs/config';
+//"mongodb+srv://<username>:<password>@technophilefirdous.kzuwf7d.mongodb.net/?retryWrites=true&w=majority&appName=TechnophileFirdous"
+//mongodb://TechnophileFirdous:fG0YvtSgm1HKu2hl@ac-k5g9okb-shard-00-00.kzuwf7d.mongodb.net:27017,ac-k5g9okb-shard-00-01.kzuwf7d.mongodb.net:27017,ac-k5g9okb-shard-00-02.kzuwf7d.mongodb.net:27017/?ssl=true&replicaSet=atlas-xjy27e-shard-0&authSource=admin&retryWrites=true&w=majority
 @Module({
-  imports: [
-    DashboardModule,
-    InvoiceModule,
-    CustomerModule,
-    MongooseModule.forRoot(
-      'mongodb://TechnophileFirdous:Zuni2058Alam@ac-k5g9okb-shard-00-00.kzuwf7d.mongodb.net:27017,ac-k5g9okb-shard-00-01.kzuwf7d.mongodb.net:27017,ac-k5g9okb-shard-00-02.kzuwf7d.mongodb.net:27017/?ssl=true&replicaSet=atlas-xjy27e-shard-0&authSource=admin&retryWrites=true&w=majority',
-    ),
-    MongooseModule.forFeature([{ name: 'Student', schema: StudentSchema }]),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'poll_user',
-      password: 'poll_password',
-      database: 'poll_db',
-      entities: [Poll],
-      synchronize: true,
+  imports: [IndividualModule,
+    
+    MongooseModule.forRoot('mongodb://TechnophileFirdous:fG0YvtSgm1HKu2hl@ac-k5g9okb-shard-00-00.kzuwf7d.mongodb.net:27017,ac-k5g9okb-shard-00-01.kzuwf7d.mongodb.net:27017,ac-k5g9okb-shard-00-02.kzuwf7d.mongodb.net:27017/?ssl=true&replicaSet=atlas-xjy27e-shard-0&authSource=admin&retryWrites=true&w=majority'),
+    AuthModule,
+    UsersModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [config],
+      //envFilePath: '.development.env', to use environemt specific file
+      //envFilePath: ['.env.development.local', '.env.development'],
     }),
-    TypeOrmModule.forFeature([Poll]),
   ],
-  controllers: [AppController, StudentController, PollController],
-  providers: [AppService, StudentService, PollService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
